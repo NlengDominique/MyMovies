@@ -1,6 +1,7 @@
 import Search from "./components/Search";
 import { useEffect, useState } from "react";
 import Spinner from "./components/Spinner";
+import MovieCard from "./components/MovieCard";
 
 export default function App(){
 
@@ -25,11 +26,11 @@ export default function App(){
     const [loading,setLoading] = useState(false)
 
     const fetchMovies = async () => {
+
         setLoading(true)
         setErrorMessage('')
-        try {
 
-        
+        try {
             const response = await fetch(`${API_URL}/discover/movie?sort_by=popularity.desc`,API_OPTIONS)
 
            if(!response.ok){
@@ -39,12 +40,17 @@ export default function App(){
            }
 
            const data = await response.json()
+
+           console.log(data);
+           
         
 
            if(data.Response == 'False'){
+
             setErrorMessage(data.Error || 'Failed to fetch movies')
             setMovies([])
             return
+
            }
 
            setMovies(data.results || [])
@@ -61,7 +67,6 @@ export default function App(){
         }   
         
     }
-
 
     useEffect(() => {
         fetchMovies()
@@ -81,15 +86,16 @@ export default function App(){
 
                 <section className="all-movies">
 
-                    <h2>All Movies</h2>
+                    <h2 className="mt-[40px]">All Movies</h2>
                     {loading ? (<Spinner/>) : errorMessage ? (
                         <p className="text-red-500">{errorMessage}</p>
                     ) : (
                         <ul>
                             {movies.map((movie) => (
-                                <li key={movie.id} className="text-white">
-                                    {movie.title}
-                                </li>
+                                <MovieCard title={movie.title} poster_path={movie.poster_path} key={movie.id}
+                                vote_average={movie.vote_average}
+                                release_date={movie.release_date}
+                                original_language={movie.original_language} />
                             ))}
                         </ul>
                     )} 
