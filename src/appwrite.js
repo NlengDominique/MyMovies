@@ -1,14 +1,12 @@
 import { Client, Databases, Query ,ID} from "appwrite"
 
-
-export const updateSearchCount = async (searchTerm , movie) => {
-
-  const client = new Client()
-  .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT)
-  .setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID)
+const client = new Client()
+.setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT)
+.setProject(import.meta.env.VITE_APPWRITE_PROJECT_ID)
 
 const database = new Databases(client)
 
+export const updateSearchCount = async (searchTerm , movie) => {
 
 try {
     const result  = await database.listDocuments(import.meta.env.VITE_APPWRITE_DATABASE_ID,
@@ -39,4 +37,20 @@ try {
     
 }
     
+}
+
+export const getTrendingMovies = async() => {
+    try {
+        const result  = await database.listDocuments(import.meta.env.VITE_APPWRITE_DATABASE_ID,
+            import.meta.env.VITE_APPWRITE_COLLECTION_ID,[
+               Query.limit(5),
+               Query.orderDesc("count")
+            ]
+        )
+
+        return result.documents
+    } catch (error) {
+        console.log(error)
+        
+    }
 }

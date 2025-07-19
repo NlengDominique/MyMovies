@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
 import { useDebounce } from "react-use";
-import { updateSearchCount } from "./appwrite";
+import { getTrendingMovies, updateSearchCount } from "./appwrite";
 
 export default function App(){
 
@@ -28,6 +28,8 @@ export default function App(){
     const [loading,setLoading] = useState(false)
 
     const [debounceSearchTerm,setDebounceSearchTerm] = useState('')
+
+    const [trendingMovies, setTrendingMovies] = useState([])
 
     useDebounce(() => setDebounceSearchTerm(searchTerm),1000,[searchTerm])
 
@@ -81,9 +83,24 @@ export default function App(){
         
     }
 
+    const loadTrendingMovies = async() => {
+        try {
+            const movies = await getTrendingMovies()
+            setTrendingMovies(movies)
+        } catch (error) {
+            console.log(`Error fetching trending movies :${error}`);
+
+        }
+    }
+
     useEffect(() => {
         fetchMovies(debounceSearchTerm)
     },[debounceSearchTerm])
+
+    useEffect(() => {
+        loadTrendingMovies()
+    },[])
+
     return (
         <main>
             <div className="pattern" />
@@ -95,11 +112,23 @@ export default function App(){
                     <h1>Find <span className="text-gradient">Movies</span> You’ll Love Without the Hassle</h1>
                     <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
                 
-                </header>
+                </header>   
+
+                {trendingMovies.length > 0 && (
+                    <section className="trending">
+                        <h2>Trending Movies</h2>
+                        <ul>
+                            {trendingMovies.map((movie,index) => <li key={movie.$id}>
+                                <p>{index + 1}</p>
+                                <img src={movie.poster_url} alt={movie.title} />
+                            </li>)}
+                        </ul>
+                    </section>
+                )}
 
                 <section className="all-movies">
 
-                    <h2 className="mt-[40px]">All Movies</h2>
+                    <h2>All Movies</h2>
                     {loading ? (<Spinner/>) : errorMessage ? (
                         <p className="text-red-500">{errorMessage}</p>
                     ) : (
