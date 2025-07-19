@@ -2,6 +2,7 @@ import Search from "./components/Search";
 import { useEffect, useState } from "react";
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
+import { useDebounce } from "react-use";
 
 export default function App(){
 
@@ -25,13 +26,20 @@ export default function App(){
 
     const [loading,setLoading] = useState(false)
 
-    const fetchMovies = async () => {
+    const [debounceSearchTerm,setDebounceSearchTerm] = useState('')
+
+    useDebounce(() => setDebounceSearchTerm(searchTerm),500,[searchTerm])
+
+    const fetchMovies = async (query='') => {
 
         setLoading(true)
         setErrorMessage('')
 
         try {
-            const response = await fetch(`${API_URL}/discover/movie?sort_by=popularity.desc`,API_OPTIONS)
+
+            const endpoint = query ? `${API_URL}/search/movie?query=${encodeURIComponent(query)}`
+            : `${API_URL}/discover/movie?sort_by=popularity.desc`
+            const response = await fetch(endpoint,API_OPTIONS)
 
            if(!response.ok){
             
@@ -69,8 +77,8 @@ export default function App(){
     }
 
     useEffect(() => {
-        fetchMovies()
-    },[])
+        fetchMovies(debounceSearchTerm)
+    },[debounceSearchTerm])
     return (
         <main>
             <div className="pattern" />
