@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
 import { useDebounce } from "react-use";
+import { updateSearchCount } from "./appwrite";
 
 export default function App(){
 
@@ -28,7 +29,7 @@ export default function App(){
 
     const [debounceSearchTerm,setDebounceSearchTerm] = useState('')
 
-    useDebounce(() => setDebounceSearchTerm(searchTerm),500,[searchTerm])
+    useDebounce(() => setDebounceSearchTerm(searchTerm),1000,[searchTerm])
 
     const fetchMovies = async (query='') => {
 
@@ -62,6 +63,10 @@ export default function App(){
            }
 
            setMovies(data.results || [])
+
+           if(query && data.results.length > 0){
+            await updateSearchCount(query,data.results[0])
+           }
         } 
         catch (error) {
 
